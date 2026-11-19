@@ -1,5 +1,6 @@
 """Automatiseringsprogram for hvad for noget mad og hvilke film jeg skal se til."""
 # importerede moduler
+from itertools import product
 import argparse
 import random
 import datetime
@@ -38,10 +39,12 @@ def byg_parser():
     parser.add_argument("--antal", type=int, choices=range(1, 51), metavar="1-50", default=1,
                         help="Antal forslag, der skal trækkes.")
     parser.add_argument("--seed", type=int, help="Gentag et tilfældigt udvalg med samme indstillinger.")
+    parser.add_argument("--unik", action="store_true", help="Træk forskellige forslag uden gentagelser.")
     return parser
 
 
-args = byg_parser().parse_args()
+parser = byg_parser()
+args = parser.parse_args()
 # Tidsvariabler
 nu = datetime.datetime.now()
 måned = (args.dato or nu.date()).month
@@ -107,9 +110,16 @@ def main():
             træt = træt or spørg("Hvor træt er du fra 1-10? ")
         titler = filmvalg(glad, træt)
 
-    for _ in range(args.antal):
-        ret = rng.choice(retter) if retter else None
-        titel = rng.choice(titler) if titler else None
+    if args.unik:
+        mulige = list(product(retter or [None], titler or [None]))
+        if args.antal > len(mulige):
+            parser.error(f"Der findes kun {len(mulige)} forskellige forslag med disse valg.")
+        forslag = rng.sample(mulige, args.antal)
+    else:
+        forslag = [(rng.choice(retter) if retter else None,
+                    rng.choice(titler) if titler else None) for _ in range(args.antal)]
+
+    for ret, titel in forslag:
         if ret and titel:
             print(f"Du burde spise {ret} og se {titel}.")
         elif ret:
