@@ -37,6 +37,7 @@ def byg_parser():
                         help="Få både mad og film eller kun den ene del.")
     parser.add_argument("--antal", type=int, choices=range(1, 51), metavar="1-50", default=1,
                         help="Antal forslag, der skal trækkes.")
+    parser.add_argument("--seed", type=int, help="Gentag et tilfældigt udvalg med samme indstillinger.")
     return parser
 
 
@@ -95,6 +96,7 @@ def filmvalg(glad, træt):
 
 
 def main():
+    rng = random.Random(args.seed)
     retter = madvalg() if args.vis != "film" else []
     titler = []
     if args.vis != "mad":
@@ -106,8 +108,8 @@ def main():
         titler = filmvalg(glad, træt)
 
     for _ in range(args.antal):
-        ret = random.choice(retter) if retter else None
-        titel = random.choice(titler) if titler else None
+        ret = rng.choice(retter) if retter else None
+        titel = rng.choice(titler) if titler else None
         if ret and titel:
             print(f"Du burde spise {ret} og se {titel}.")
         elif ret:
