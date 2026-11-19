@@ -57,6 +57,7 @@ def byg_parser():
     parser.add_argument("--gem", metavar="STI", help="Gem forslag i en ny UTF-8-fil.")
     parser.add_argument("--vegetar", action="store_true", help="Vælg fra programmets vegetariske madforslag.")
     parser.add_argument("--madpakke", action="store_true", help="Vælg noget, der er let at pakke til turen.")
+    parser.add_argument("--overrask", action="store_true", help="Træk humør og træthed for ubesvarede spørgsmål.")
     return parser
 
 
@@ -187,6 +188,9 @@ def main():
         glad = args.glad
         træt = args.træt
         if not args.genre:
+            if args.overrask:
+                glad = glad or rng.randint(1, 10)
+                træt = træt or rng.randint(1, 10)
             glad = glad or spørg("Hvor glad er du fra 1-10? ")
             træt = træt or spørg("Hvor træt er du fra 1-10? ")
         titler = filmvalg(glad, træt)
