@@ -43,6 +43,7 @@ def byg_parser():
     parser.add_argument("--madtid", type=int, metavar="MIN", help="Maksimal anslået tilberedningstid.")
     parser.add_argument("--servering", choices=("varm", "kold"), help="Vælg varm eller kold mad.")
     parser.add_argument("--type", choices=("film", "serie"), help="Vælg spillefilm eller serieafsnit.")
+    parser.add_argument("--spilletid", type=int, metavar="MIN", help="Maksimal cirka-spilletid pr. titel.")
     return parser
 
 
@@ -105,6 +106,15 @@ GENRER = dict(zip(("komedie", "spænding", "drama", "jul"), film))
 SERIER = {"How i met your mother", "Friends"}
 
 
+# Cirka spilletid i minutter, for serier pr. afsnit.
+SPILLETID = {
+    "How i met your mother": 22, "Friends": 22, "Tømmermænd i Vegas": 100,
+    "The Mechanic": 93, "White House Down": 131, "Interstellar": 169,
+    "Greenbook": 130, "Shawshank Redemption": 142, "Intouchables": 112,
+    "Home Alone": 103, "Elf": 97, "Die Hard": 132,
+}
+
+
 def filmvalg(glad, træt):
     if args.genre:
         return GENRER[args.genre]
@@ -141,6 +151,11 @@ def main():
         titler = [titel for titel in titler if (titel in SERIER) == (args.type == "serie")]
         if not titler:
             parser.error("Ingen titler af den ønskede type. Prøv en anden genre.")
+
+    if args.vis != "mad" and args.spilletid is not None:
+        titler = [titel for titel in titler if SPILLETID[titel] <= args.spilletid]
+        if not titler:
+            parser.error("Ingen titler passer til spilletiden.")
 
     if args.unik:
         mulige = list(product(retter or [None], titler or [None]))
