@@ -1,5 +1,6 @@
 """Automatiseringsprogram for hvad for noget mad og hvilke film jeg skal se til."""
 # importerede moduler
+import argparse
 import random
 import datetime
 
@@ -18,7 +19,15 @@ def spørg(spørgsmål):
             print("Skriv et helt tal fra 1 til 10.")
 
 
-glad = spørg("Hvor glad er du fra 1-10? ")
+def byg_parser():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--glad", type=int, choices=range(1, 11), metavar="1-10",
+                        help="Angiv humør på forhånd.")
+    return parser
+
+
+args = byg_parser().parse_args()
+glad = args.glad or spørg("Hvor glad er du fra 1-10? ")
 træt = spørg("Hvor træt er du fra 1-10? ")
 # Tidsvariabler
 nu = datetime.datetime.now()
