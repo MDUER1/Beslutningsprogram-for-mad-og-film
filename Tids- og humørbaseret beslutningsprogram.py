@@ -48,6 +48,7 @@ def byg_parser():
                         help="Udeluk en ret eller titel. Kan gentages.")
     parser.add_argument("--katalog", choices=("mad", "film"), help="Vis mad- eller filmkataloget uden lodtrækning.")
     parser.add_argument("--søg", metavar="TEKST", help="Søg efter navn eller kategori i det valgte katalog.")
+    parser.add_argument("--detaljer", action="store_true", help="Vis cirka-tider sammen med forslagene.")
     return parser
 
 
@@ -194,6 +195,11 @@ def main():
                     rng.choice(titler) if titler else None) for _ in range(args.antal)]
 
     for ret, titel in forslag:
+        if args.detaljer:
+            if ret:
+                ret = f"{ret} (ca. {MADTID[ret]} min. tilberedning)"
+            if titel:
+                titel = f"{titel} (ca. {SPILLETID[titel]} min. spilletid)"
         if ret and titel:
             print(f"Du burde spise {ret} og se {titel}.")
         elif ret:
