@@ -35,6 +35,8 @@ def byg_parser():
                         help="Vælg selv filmkategori.")
     parser.add_argument("--vis", choices=("begge", "mad", "film"), default="begge",
                         help="Få både mad og film eller kun den ene del.")
+    parser.add_argument("--antal", type=int, choices=range(1, 51), metavar="1-50", default=1,
+                        help="Antal forslag, der skal trækkes.")
     return parser
 
 
@@ -103,14 +105,15 @@ def main():
             træt = træt or spørg("Hvor træt er du fra 1-10? ")
         titler = filmvalg(glad, træt)
 
-    ret = random.choice(retter) if retter else None
-    titel = random.choice(titler) if titler else None
-    if ret and titel:
-        print(f"Du burde spise {ret} og se {titel}.")
-    elif ret:
-        print(f"Du burde spise {ret}.")
-    else:
-        print(f"Du burde se {titel}.")
+    for _ in range(args.antal):
+        ret = random.choice(retter) if retter else None
+        titel = random.choice(titler) if titler else None
+        if ret and titel:
+            print(f"Du burde spise {ret} og se {titel}.")
+        elif ret:
+            print(f"Du burde spise {ret}.")
+        else:
+            print(f"Du burde se {titel}.")
 
 
 if __name__ == "__main__":
