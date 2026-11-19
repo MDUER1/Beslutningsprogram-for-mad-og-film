@@ -42,6 +42,7 @@ def byg_parser():
     parser.add_argument("--unik", action="store_true", help="Træk forskellige forslag uden gentagelser.")
     parser.add_argument("--madtid", type=int, metavar="MIN", help="Maksimal anslået tilberedningstid.")
     parser.add_argument("--servering", choices=("varm", "kold"), help="Vælg varm eller kold mad.")
+    parser.add_argument("--type", choices=("film", "serie"), help="Vælg spillefilm eller serieafsnit.")
     return parser
 
 
@@ -101,6 +102,9 @@ def madvalg():
 GENRER = dict(zip(("komedie", "spænding", "drama", "jul"), film))
 
 
+SERIER = {"How i met your mother", "Friends"}
+
+
 def filmvalg(glad, træt):
     if args.genre:
         return GENRER[args.genre]
@@ -132,6 +136,11 @@ def main():
             glad = glad or spørg("Hvor glad er du fra 1-10? ")
             træt = træt or spørg("Hvor træt er du fra 1-10? ")
         titler = filmvalg(glad, træt)
+
+    if args.vis != "mad" and args.type:
+        titler = [titel for titel in titler if (titel in SERIER) == (args.type == "serie")]
+        if not titler:
+            parser.error("Ingen titler af den ønskede type. Prøv en anden genre.")
 
     if args.unik:
         mulige = list(product(retter or [None], titler or [None]))
