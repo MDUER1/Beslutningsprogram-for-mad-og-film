@@ -33,12 +33,12 @@ def byg_parser():
                         help="Vælg måltid uafhængigt af klokkeslættet.")
     parser.add_argument("--genre", choices=("komedie", "spænding", "drama", "jul"),
                         help="Vælg selv filmkategori.")
+    parser.add_argument("--vis", choices=("begge", "mad", "film"), default="begge",
+                        help="Få både mad og film eller kun den ene del.")
     return parser
 
 
 args = byg_parser().parse_args()
-glad = args.glad or spørg("Hvor glad er du fra 1-10? ")
-træt = args.træt or spørg("Hvor træt er du fra 1-10? ")
 # Tidsvariabler
 nu = datetime.datetime.now()
 måned = (args.dato or nu.date()).month
@@ -92,9 +92,26 @@ def filmvalg(glad, træt):
     return [titel for gruppe in film for titel in gruppe]
 
 
-# kald funktionerne
-tilfældig_film = random.choice(filmvalg(glad, træt))
-tilfældig_ret = random.choice(madvalg())
+def main():
+    retter = madvalg() if args.vis != "film" else []
+    titler = []
+    if args.vis != "mad":
+        glad = args.glad
+        træt = args.træt
+        if not args.genre:
+            glad = glad or spørg("Hvor glad er du fra 1-10? ")
+            træt = træt or spørg("Hvor træt er du fra 1-10? ")
+        titler = filmvalg(glad, træt)
 
-# print svar på valg
-print(f"Du burde spise {tilfældig_ret} og se {tilfældig_film}.")
+    ret = random.choice(retter) if retter else None
+    titel = random.choice(titler) if titler else None
+    if ret and titel:
+        print(f"Du burde spise {ret} og se {titel}.")
+    elif ret:
+        print(f"Du burde spise {ret}.")
+    else:
+        print(f"Du burde se {titel}.")
+
+
+if __name__ == "__main__":
+    main()
