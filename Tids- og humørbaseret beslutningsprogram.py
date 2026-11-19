@@ -1,6 +1,8 @@
 """Automatiseringsprogram for hvad for noget mad og hvilke film jeg skal se til."""
 # importerede moduler
 from itertools import product
+import sys
+import json
 import argparse
 import random
 import datetime
@@ -15,9 +17,10 @@ def karakter(tekst):
 def spørg(spørgsmål):
     while True:
         try:
-            return karakter(input(spørgsmål))
+            print(spørgsmål, end="", file=sys.stderr, flush=True)
+            return karakter(input())
         except ValueError:
-            print("Skriv et helt tal fra 1 til 10.")
+            print("Skriv et helt tal fra 1 til 10.", file=sys.stderr)
 
 
 def byg_parser():
@@ -49,6 +52,7 @@ def byg_parser():
     parser.add_argument("--katalog", choices=("mad", "film"), help="Vis mad- eller filmkataloget uden lodtrækning.")
     parser.add_argument("--søg", metavar="TEKST", help="Søg efter navn eller kategori i det valgte katalog.")
     parser.add_argument("--detaljer", action="store_true", help="Vis cirka-tider sammen med forslagene.")
+    parser.add_argument("--format", choices=("tekst", "json"), default="tekst", help="Vælg outputformat.")
     return parser
 
 
@@ -194,6 +198,30 @@ def main():
         forslag = [(rng.choice(retter) if retter else None,
                     rng.choice(titler) if titler else None) for _ in range(args.antal)]
 
+    vis_forslag(forslag)
+
+
+def tabel(forslag):
+    rækker = []
+    for ret, titel in forslag:
+        række = {}
+        if ret:
+            række["mad"] = ret
+            if args.detaljer:
+                række["tilberedning_min"] = MADTID[ret]
+        if titel:
+            række["film"] = titel
+            if args.detaljer:
+                række["spilletid_min"] = SPILLETID[titel]
+        rækker.append(række)
+    return rækker
+
+
+def vis_forslag(forslag):
+    if args.format == "json":
+        rækker = tabel(forslag)
+        print(json.dumps(rækker, ensure_ascii=False, indent=2))
+        return
     for ret, titel in forslag:
         if args.detaljer:
             if ret:
