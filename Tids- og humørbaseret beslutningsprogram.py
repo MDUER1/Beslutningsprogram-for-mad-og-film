@@ -25,6 +25,8 @@ def byg_parser():
                         help="Angiv humør på forhånd.")
     parser.add_argument("--træt", type=int, choices=range(1, 11), metavar="1-10",
                         help="Angiv træthed på forhånd.")
+    parser.add_argument("--tid", type=datetime.time.fromisoformat, metavar="TT:MM",
+                        help="Vælg klokkeslættet for måltidet.")
     return parser
 
 
@@ -34,7 +36,7 @@ træt = args.træt or spørg("Hvor træt er du fra 1-10? ")
 # Tidsvariabler
 nu = datetime.datetime.now()
 måned = nu.month
-dagstime = nu.hour
+dagstime = (args.tid or nu.time()).hour
 
 
 # lister med info
