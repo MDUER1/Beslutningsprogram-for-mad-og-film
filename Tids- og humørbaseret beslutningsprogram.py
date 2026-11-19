@@ -58,6 +58,8 @@ def byg_parser():
     parser.add_argument("--vegetar", action="store_true", help="Vælg fra programmets vegetariske madforslag.")
     parser.add_argument("--madpakke", action="store_true", help="Vælg noget, der er let at pakke til turen.")
     parser.add_argument("--overrask", action="store_true", help="Træk humør og træthed for ubesvarede spørgsmål.")
+    parser.add_argument("--aftentid", type=int, metavar="MIN",
+                        help="Samlet tidsbudget til tilberedning og visning.")
     return parser
 
 
@@ -213,11 +215,17 @@ def main():
     if args.vis != "mad" and not titler:
         parser.error("Ingen titler tilbage efter filtrering.")
 
-    if args.unik:
+    if args.aftentid is not None or args.unik:
         mulige = list(product(retter or [None], titler or [None]))
-        if args.antal > len(mulige):
+        if args.aftentid is not None:
+            mulige = [(ret, titel) for ret, titel in mulige
+                      if MADTID.get(ret, 0) + SPILLETID.get(titel, 0) <= args.aftentid]
+            if not mulige:
+                parser.error("Ingen forslag passer til aftenens samlede tidsbudget.")
+        if args.unik and args.antal > len(mulige):
             parser.error(f"Der findes kun {len(mulige)} forskellige forslag med disse valg.")
-        forslag = rng.sample(mulige, args.antal)
+        forslag = (rng.sample(mulige, args.antal) if args.unik
+                   else rng.choices(mulige, k=args.antal))
     else:
         forslag = [(rng.choice(retter) if retter else None,
                     rng.choice(titler) if titler else None) for _ in range(args.antal)]
