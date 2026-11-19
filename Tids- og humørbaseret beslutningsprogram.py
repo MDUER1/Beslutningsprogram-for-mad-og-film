@@ -30,7 +30,7 @@ def byg_parser():
                         help="Vælg klokkeslættet for måltidet.")
     parser.add_argument("--dato", type=datetime.date.fromisoformat, metavar="ÅÅÅÅ-MM-DD",
                         help="Brug en bestemt dato til sæsonens filmvalg.")
-    parser.add_argument("--måltid", choices=("morgenmad", "frokost", "aftensmad"),
+    parser.add_argument("--måltid", choices=("morgenmad", "frokost", "aftensmad", "snack"),
                         help="Vælg måltid uafhængigt af klokkeslættet.")
     parser.add_argument("--genre", choices=("komedie", "spænding", "drama", "jul"),
                         help="Vælg selv filmkategori.")
@@ -69,6 +69,7 @@ film = [
 
 
 MÅLTIDER = dict(zip(("morgenmad", "frokost", "aftensmad"), mad))
+MÅLTIDER["snack"] = ["popcorn", "gulerodsstave", "ristede kikærter"]
 
 
 def madvalg():
