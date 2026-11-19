@@ -54,6 +54,7 @@ def byg_parser():
     parser.add_argument("--søg", metavar="TEKST", help="Søg efter navn eller kategori i det valgte katalog.")
     parser.add_argument("--detaljer", action="store_true", help="Vis cirka-tider sammen med forslagene.")
     parser.add_argument("--format", choices=("tekst", "json", "csv"), default="tekst", help="Vælg outputformat.")
+    parser.add_argument("--gem", metavar="STI", help="Gem forslag i en ny UTF-8-fil.")
     return parser
 
 
@@ -139,6 +140,8 @@ def filmvalg(glad, træt):
 
 def main():
     if args.katalog:
+        if args.gem:
+            parser.error("--gem bruges til forslag. Fjern --katalog for at gemme.")
         katalog = MÅLTIDER if args.katalog == "mad" else GENRER
         fundet = False
         søgning = (args.søg or "").strip().casefold()
@@ -199,7 +202,14 @@ def main():
         forslag = [(rng.choice(retter) if retter else None,
                     rng.choice(titler) if titler else None) for _ in range(args.antal)]
 
-    vis_forslag(forslag)
+    if args.gem:
+        try:
+            with open(args.gem, "x", encoding="utf-8", newline="") as fil:
+                vis_forslag(forslag, fil)
+        except OSError as fejl:
+            parser.error(f"Kunne ikke gemme i {args.gem}: {fejl}")
+    else:
+        vis_forslag(forslag, sys.stdout)
 
 
 def tabel(forslag):
@@ -218,16 +228,16 @@ def tabel(forslag):
     return rækker
 
 
-def vis_forslag(forslag):
+def vis_forslag(forslag, fil):
     if args.format == "csv":
         rækker = tabel(forslag)
-        writer = csv.DictWriter(sys.stdout, fieldnames=list(rækker[0]), lineterminator="\n")
+        writer = csv.DictWriter(fil, fieldnames=list(rækker[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rækker)
         return
     if args.format == "json":
         rækker = tabel(forslag)
-        print(json.dumps(rækker, ensure_ascii=False, indent=2))
+        print(json.dumps(rækker, ensure_ascii=False, indent=2), file=fil)
         return
     for ret, titel in forslag:
         if args.detaljer:
@@ -236,11 +246,11 @@ def vis_forslag(forslag):
             if titel:
                 titel = f"{titel} (ca. {SPILLETID[titel]} min. spilletid)"
         if ret and titel:
-            print(f"Du burde spise {ret} og se {titel}.")
+            print(f"Du burde spise {ret} og se {titel}.", file=fil)
         elif ret:
-            print(f"Du burde spise {ret}.")
+            print(f"Du burde spise {ret}.", file=fil)
         else:
-            print(f"Du burde se {titel}.")
+            print(f"Du burde se {titel}.", file=fil)
 
 
 if __name__ == "__main__":
