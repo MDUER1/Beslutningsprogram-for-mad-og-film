@@ -56,6 +56,7 @@ def byg_parser():
     parser.add_argument("--format", choices=("tekst", "json", "csv", "markdown"), default="tekst", help="Vælg outputformat.")
     parser.add_argument("--gem", metavar="STI", help="Gem forslag i en ny UTF-8-fil.")
     parser.add_argument("--vegetar", action="store_true", help="Vælg fra programmets vegetariske madforslag.")
+    parser.add_argument("--madpakke", action="store_true", help="Vælg noget, der er let at pakke til turen.")
     return parser
 
 
@@ -103,6 +104,9 @@ KOLDE_RETTER = {"yoghurt", "kakaomælk", "frugt", "gulerodsstave"}
 # Kun forslag, der som angivet kan serveres vegetarisk.
 VEGETAR = {"havregrød", "yoghurt", "kakaomælk", "æg", "frugt", "bønner",
            "ratatouille", "popcorn", "gulerodsstave", "ristede kikærter"}
+
+
+MADPAKKE = {"æg", "frugt", "gulerodsstave", "ristede kikærter", "popcorn"}
 
 
 def madvalg():
@@ -164,6 +168,10 @@ def main():
         parser.error("--søg kræver --katalog mad eller film.")
     rng = random.Random(args.seed)
     retter = madvalg() if args.vis != "film" else []
+    if args.madpakke and args.vis != "film":
+        if not args.måltid:
+            retter = [ret for navne in MÅLTIDER.values() for ret in navne]
+        retter = [ret for ret in retter if ret in MADPAKKE]
     if args.vis != "film" and args.madtid is not None:
         retter = [ret for ret in retter if MADTID[ret] <= args.madtid]
         if not retter:
