@@ -29,6 +29,8 @@ def byg_parser():
                         help="Vælg klokkeslættet for måltidet.")
     parser.add_argument("--dato", type=datetime.date.fromisoformat, metavar="ÅÅÅÅ-MM-DD",
                         help="Brug en bestemt dato til sæsonens filmvalg.")
+    parser.add_argument("--måltid", choices=("morgenmad", "frokost", "aftensmad"),
+                        help="Vælg måltid uafhængigt af klokkeslættet.")
     return parser
 
 
@@ -58,17 +60,19 @@ film = [
 # funktioner
 
 
-def måltid_tidspunkt_baseret():
+MÅLTIDER = dict(zip(("morgenmad", "frokost", "aftensmad"), mad))
 
+
+def madvalg():
+    if args.måltid:
+        return MÅLTIDER[args.måltid]
     if 6 <= dagstime <= 12:
-        tilfældig_ret = random.choice(mad[0])
-    elif 12 <= dagstime <= 17:
-        tilfældig_ret = random.choice(mad[1])
-    elif 18 <= dagstime <= 24:
-        tilfældig_ret = random.choice(mad[2])
-    else:
-        tilfældig_ret = random.choice(random.choice(mad))
-    return tilfældig_ret
+        return mad[0]
+    if 13 <= dagstime <= 17:
+        return mad[1]
+    if dagstime >= 18:
+        return mad[2]
+    return [ret for gruppe in mad for ret in gruppe]
 
 
 def film_humør_baseret(glad, træt):
@@ -85,7 +89,7 @@ def film_humør_baseret(glad, træt):
 
 # kald funktionerne
 tilfældig_film = film_humør_baseret(glad, træt)
-tilfældig_ret = måltid_tidspunkt_baseret()
+tilfældig_ret = random.choice(madvalg())
 
 # print svar på valg
 print(f"Du burde spise {tilfældig_ret} og se {tilfældig_film}.")
