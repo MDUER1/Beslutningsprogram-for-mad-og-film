@@ -41,6 +41,7 @@ def byg_parser():
     parser.add_argument("--seed", type=int, help="Gentag et tilfældigt udvalg med samme indstillinger.")
     parser.add_argument("--unik", action="store_true", help="Træk forskellige forslag uden gentagelser.")
     parser.add_argument("--madtid", type=int, metavar="MIN", help="Maksimal anslået tilberedningstid.")
+    parser.add_argument("--servering", choices=("varm", "kold"), help="Vælg varm eller kold mad.")
     return parser
 
 
@@ -82,6 +83,9 @@ MADTID = {
 }
 
 
+KOLDE_RETTER = {"yoghurt", "kakaomælk", "frugt", "gulerodsstave"}
+
+
 def madvalg():
     if args.måltid:
         return MÅLTIDER[args.måltid]
@@ -116,6 +120,10 @@ def main():
         retter = [ret for ret in retter if MADTID[ret] <= args.madtid]
         if not retter:
             parser.error("Ingen retter passer til tilberedningstiden.")
+    if args.vis != "film" and args.servering:
+        retter = [ret for ret in retter if (ret in KOLDE_RETTER) == (args.servering == "kold")]
+        if not retter:
+            parser.error("Ingen retter passer til den valgte servering.")
     titler = []
     if args.vis != "mad":
         glad = args.glad
