@@ -1,6 +1,7 @@
 """Automatiseringsprogram for hvad for noget mad og hvilke film jeg skal se til."""
 # importerede moduler
 from itertools import product
+import csv
 import sys
 import json
 import argparse
@@ -52,7 +53,7 @@ def byg_parser():
     parser.add_argument("--katalog", choices=("mad", "film"), help="Vis mad- eller filmkataloget uden lodtrækning.")
     parser.add_argument("--søg", metavar="TEKST", help="Søg efter navn eller kategori i det valgte katalog.")
     parser.add_argument("--detaljer", action="store_true", help="Vis cirka-tider sammen med forslagene.")
-    parser.add_argument("--format", choices=("tekst", "json"), default="tekst", help="Vælg outputformat.")
+    parser.add_argument("--format", choices=("tekst", "json", "csv"), default="tekst", help="Vælg outputformat.")
     return parser
 
 
@@ -218,6 +219,12 @@ def tabel(forslag):
 
 
 def vis_forslag(forslag):
+    if args.format == "csv":
+        rækker = tabel(forslag)
+        writer = csv.DictWriter(sys.stdout, fieldnames=list(rækker[0]), lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rækker)
+        return
     if args.format == "json":
         rækker = tabel(forslag)
         print(json.dumps(rækker, ensure_ascii=False, indent=2))
