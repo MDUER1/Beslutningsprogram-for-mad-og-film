@@ -31,6 +31,8 @@ def byg_parser():
                         help="Brug en bestemt dato til sæsonens filmvalg.")
     parser.add_argument("--måltid", choices=("morgenmad", "frokost", "aftensmad"),
                         help="Vælg måltid uafhængigt af klokkeslættet.")
+    parser.add_argument("--genre", choices=("komedie", "spænding", "drama", "jul"),
+                        help="Vælg selv filmkategori.")
     return parser
 
 
@@ -75,20 +77,23 @@ def madvalg():
     return [ret for gruppe in mad for ret in gruppe]
 
 
-def film_humør_baseret(glad, træt):
-    if måned in [11, 12, 1, 2] and (glad <= 3 or træt <= 3):
-        tilfældig_film = random.choice(film[3])
-    elif glad <= 3 or træt <= 3:
-        tilfældig_film = random.choice(film[random.choice([1, 2])])
-    elif måned in range(3, 8):
-        tilfældig_film = random.choice(film[2])
-    else:
-        tilfældig_film = random.choice(random.choice(film))
-    return tilfældig_film
+GENRER = dict(zip(("komedie", "spænding", "drama", "jul"), film))
+
+
+def filmvalg(glad, træt):
+    if args.genre:
+        return GENRER[args.genre]
+    if glad <= 3 or træt <= 3:
+        if måned in (11, 12, 1, 2):
+            return film[3]
+        return film[1] + film[2]
+    if måned in range(3, 8):
+        return film[2]
+    return [titel for gruppe in film for titel in gruppe]
 
 
 # kald funktionerne
-tilfældig_film = film_humør_baseret(glad, træt)
+tilfældig_film = random.choice(filmvalg(glad, træt))
 tilfældig_ret = random.choice(madvalg())
 
 # print svar på valg
