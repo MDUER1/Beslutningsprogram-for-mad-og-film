@@ -23,12 +23,14 @@ def byg_parser():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--glad", type=int, choices=range(1, 11), metavar="1-10",
                         help="Angiv humør på forhånd.")
+    parser.add_argument("--træt", type=int, choices=range(1, 11), metavar="1-10",
+                        help="Angiv træthed på forhånd.")
     return parser
 
 
 args = byg_parser().parse_args()
 glad = args.glad or spørg("Hvor glad er du fra 1-10? ")
-træt = spørg("Hvor træt er du fra 1-10? ")
+træt = args.træt or spørg("Hvor træt er du fra 1-10? ")
 # Tidsvariabler
 nu = datetime.datetime.now()
 måned = nu.month
