@@ -47,6 +47,7 @@ def byg_parser():
     parser.add_argument("--udelad", action="append", default=[], metavar="NAVN",
                         help="Udeluk en ret eller titel. Kan gentages.")
     parser.add_argument("--katalog", choices=("mad", "film"), help="Vis mad- eller filmkataloget uden lodtrækning.")
+    parser.add_argument("--søg", metavar="TEKST", help="Søg efter navn eller kategori i det valgte katalog.")
     return parser
 
 
@@ -133,11 +134,19 @@ def filmvalg(glad, træt):
 def main():
     if args.katalog:
         katalog = MÅLTIDER if args.katalog == "mad" else GENRER
+        fundet = False
+        søgning = (args.søg or "").strip().casefold()
         for gruppe, navne in katalog.items():
             for navn in navne:
-                print(f"{gruppe}: {navn}")
+                if søgning in navn.casefold() or søgning in gruppe.casefold():
+                    print(f"{gruppe}: {navn}")
+                    fundet = True
+        if not fundet:
+            print("Ingen resultater.")
         return
 
+    if args.søg is not None:
+        parser.error("--søg kræver --katalog mad eller film.")
     rng = random.Random(args.seed)
     retter = madvalg() if args.vis != "film" else []
     if args.vis != "film" and args.madtid is not None:
