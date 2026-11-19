@@ -3,9 +3,23 @@
 import random
 import datetime
 
-# Variabler: Bruger-input
-glad = int(input("hvor glad er du fra 1-10?"))
-træt = int(input("hvor træt er du fra 1-10?"))
+def karakter(tekst):
+    værdi = int(tekst)
+    if not 1 <= værdi <= 10:
+        raise ValueError
+    return værdi
+
+
+def spørg(spørgsmål):
+    while True:
+        try:
+            return karakter(input(spørgsmål))
+        except ValueError:
+            print("Skriv et helt tal fra 1 til 10.")
+
+
+glad = spørg("Hvor glad er du fra 1-10? ")
+træt = spørg("Hvor træt er du fra 1-10? ")
 # Tidsvariabler
 nu = datetime.datetime.now()
 måned = nu.month
