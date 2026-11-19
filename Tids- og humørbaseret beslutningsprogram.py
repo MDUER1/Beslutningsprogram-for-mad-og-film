@@ -27,6 +27,8 @@ def byg_parser():
                         help="Angiv træthed på forhånd.")
     parser.add_argument("--tid", type=datetime.time.fromisoformat, metavar="TT:MM",
                         help="Vælg klokkeslættet for måltidet.")
+    parser.add_argument("--dato", type=datetime.date.fromisoformat, metavar="ÅÅÅÅ-MM-DD",
+                        help="Brug en bestemt dato til sæsonens filmvalg.")
     return parser
 
 
@@ -35,7 +37,7 @@ glad = args.glad or spørg("Hvor glad er du fra 1-10? ")
 træt = args.træt or spørg("Hvor træt er du fra 1-10? ")
 # Tidsvariabler
 nu = datetime.datetime.now()
-måned = nu.month
+måned = (args.dato or nu.date()).month
 dagstime = (args.tid or nu.time()).hour
 
 
@@ -70,11 +72,11 @@ def måltid_tidspunkt_baseret():
 
 
 def film_humør_baseret(glad, træt):
-    if 0 <= glad <= 3 or 0 <= træt <= 3:
-        tilfældig_film = random.choice(film[random.choice([1, 2])])
-    elif måned in [11, 12, 1, 2] and 0 <= glad <= 3 or 0 <= træt <= 3:
+    if måned in [11, 12, 1, 2] and (glad <= 3 or træt <= 3):
         tilfældig_film = random.choice(film[3])
-    elif måned in range(3, 8) and 4 <= glad <= 10 or 4 <= træt <= 10:  # fra 3-10
+    elif glad <= 3 or træt <= 3:
+        tilfældig_film = random.choice(film[random.choice([1, 2])])
+    elif måned in range(3, 8):
         tilfældig_film = random.choice(film[2])
     else:
         tilfældig_film = random.choice(random.choice(film))
