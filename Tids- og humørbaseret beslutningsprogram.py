@@ -60,6 +60,8 @@ def byg_parser():
     parser.add_argument("--overrask", action="store_true", help="Træk humør og træthed for ubesvarede spørgsmål.")
     parser.add_argument("--aftentid", type=int, metavar="MIN",
                         help="Samlet tidsbudget til tilberedning og visning.")
+    parser.add_argument("--færdig", action="store_true",
+                        help="Vis forventet sluttid fra valgt dato og klokkeslæt.")
     return parser
 
 
@@ -240,6 +242,12 @@ def main():
         vis_forslag(forslag, sys.stdout)
 
 
+def sluttid(ret, titel):
+    start = datetime.datetime.combine(args.dato or nu.date(), args.tid or nu.time())
+    varighed = MADTID.get(ret, 0) + SPILLETID.get(titel, 0)
+    return (start + datetime.timedelta(minutes=varighed)).isoformat(sep=" ", timespec="minutes")
+
+
 def tabel(forslag):
     rækker = []
     for ret, titel in forslag:
@@ -252,6 +260,8 @@ def tabel(forslag):
             række["film"] = titel
             if args.detaljer:
                 række["spilletid_min"] = SPILLETID[titel]
+        if args.færdig:
+            række["færdig"] = sluttid(ret, titel)
         rækker.append(række)
     return rækker
 
@@ -276,6 +286,7 @@ def vis_forslag(forslag, fil):
         print(json.dumps(rækker, ensure_ascii=False, indent=2), file=fil)
         return
     for ret, titel in forslag:
+        færdig = sluttid(ret, titel) if args.færdig else None
         if args.detaljer:
             if ret:
                 ret = f"{ret} (ca. {MADTID[ret]} min. tilberedning)"
@@ -287,6 +298,8 @@ def vis_forslag(forslag, fil):
             print(f"Du burde spise {ret}.", file=fil)
         else:
             print(f"Du burde se {titel}.", file=fil)
+        if færdig:
+            print(f"Forventet færdig {færdig}.", file=fil)
 
 
 if __name__ == "__main__":
