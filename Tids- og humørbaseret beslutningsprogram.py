@@ -55,6 +55,7 @@ def byg_parser():
     parser.add_argument("--detaljer", action="store_true", help="Vis cirka-tider sammen med forslagene.")
     parser.add_argument("--format", choices=("tekst", "json", "csv", "markdown"), default="tekst", help="Vælg outputformat.")
     parser.add_argument("--gem", metavar="STI", help="Gem forslag i en ny UTF-8-fil.")
+    parser.add_argument("--vegetar", action="store_true", help="Vælg fra programmets vegetariske madforslag.")
     return parser
 
 
@@ -97,6 +98,11 @@ MADTID = {
 
 
 KOLDE_RETTER = {"yoghurt", "kakaomælk", "frugt", "gulerodsstave"}
+
+
+# Kun forslag, der som angivet kan serveres vegetarisk.
+VEGETAR = {"havregrød", "yoghurt", "kakaomælk", "æg", "frugt", "bønner",
+           "ratatouille", "popcorn", "gulerodsstave", "ristede kikærter"}
 
 
 def madvalg():
@@ -166,6 +172,8 @@ def main():
         retter = [ret for ret in retter if (ret in KOLDE_RETTER) == (args.servering == "kold")]
         if not retter:
             parser.error("Ingen retter passer til den valgte servering.")
+    if args.vegetar:
+        retter = [ret for ret in retter if ret in VEGETAR]
     titler = []
     if args.vis != "mad":
         glad = args.glad
