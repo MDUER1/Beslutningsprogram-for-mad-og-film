@@ -46,6 +46,7 @@ def byg_parser():
     parser.add_argument("--spilletid", type=int, metavar="MIN", help="Maksimal cirka-spilletid pr. titel.")
     parser.add_argument("--udelad", action="append", default=[], metavar="NAVN",
                         help="Udeluk en ret eller titel. Kan gentages.")
+    parser.add_argument("--katalog", choices=("mad",), help="Vis madkataloget uden lodtrækning.")
     return parser
 
 
@@ -130,6 +131,12 @@ def filmvalg(glad, træt):
 
 
 def main():
+    if args.katalog:
+        for gruppe, navne in MÅLTIDER.items():
+            for navn in navne:
+                print(f"{gruppe}: {navn}")
+        return
+
     rng = random.Random(args.seed)
     retter = madvalg() if args.vis != "film" else []
     if args.vis != "film" and args.madtid is not None:
