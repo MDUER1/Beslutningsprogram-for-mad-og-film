@@ -53,7 +53,7 @@ def byg_parser():
     parser.add_argument("--katalog", choices=("mad", "film"), help="Vis mad- eller filmkataloget uden lodtrækning.")
     parser.add_argument("--søg", metavar="TEKST", help="Søg efter navn eller kategori i det valgte katalog.")
     parser.add_argument("--detaljer", action="store_true", help="Vis cirka-tider sammen med forslagene.")
-    parser.add_argument("--format", choices=("tekst", "json", "csv"), default="tekst", help="Vælg outputformat.")
+    parser.add_argument("--format", choices=("tekst", "json", "csv", "markdown"), default="tekst", help="Vælg outputformat.")
     parser.add_argument("--gem", metavar="STI", help="Gem forslag i en ny UTF-8-fil.")
     return parser
 
@@ -229,6 +229,14 @@ def tabel(forslag):
 
 
 def vis_forslag(forslag, fil):
+    if args.format == "markdown":
+        rækker = tabel(forslag)
+        kolonner = list(rækker[0])
+        print("| " + " | ".join(kolonner) + " |", file=fil)
+        print("| " + " | ".join("---" for _ in kolonner) + " |", file=fil)
+        for række in rækker:
+            print("| " + " | ".join(str(række[k]) for k in kolonner) + " |", file=fil)
+        return
     if args.format == "csv":
         rækker = tabel(forslag)
         writer = csv.DictWriter(fil, fieldnames=list(rækker[0]), lineterminator="\n")
