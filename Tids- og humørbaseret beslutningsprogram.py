@@ -40,6 +40,7 @@ def byg_parser():
                         help="Antal forslag, der skal trækkes.")
     parser.add_argument("--seed", type=int, help="Gentag et tilfældigt udvalg med samme indstillinger.")
     parser.add_argument("--unik", action="store_true", help="Træk forskellige forslag uden gentagelser.")
+    parser.add_argument("--madtid", type=int, metavar="MIN", help="Maksimal anslået tilberedningstid.")
     return parser
 
 
@@ -72,6 +73,15 @@ MÅLTIDER = dict(zip(("morgenmad", "frokost", "aftensmad"), mad))
 MÅLTIDER["snack"] = ["popcorn", "gulerodsstave", "ristede kikærter"]
 
 
+# Omtrentlige minutter for en enkel portion. Thaiboks og kakaomælk er serveringsklare.
+MADTID = {
+    "havregrød": 10, "yoghurt": 2, "kakaomælk": 1,
+    "Thaiboks": 5, "æg": 10, "frugt": 3,
+    "bønner": 10, "gryderet": 45, "ratatouille": 40,
+    "popcorn": 5, "gulerodsstave": 5, "ristede kikærter": 30,
+}
+
+
 def madvalg():
     if args.måltid:
         return MÅLTIDER[args.måltid]
@@ -102,6 +112,10 @@ def filmvalg(glad, træt):
 def main():
     rng = random.Random(args.seed)
     retter = madvalg() if args.vis != "film" else []
+    if args.vis != "film" and args.madtid is not None:
+        retter = [ret for ret in retter if MADTID[ret] <= args.madtid]
+        if not retter:
+            parser.error("Ingen retter passer til tilberedningstiden.")
     titler = []
     if args.vis != "mad":
         glad = args.glad
