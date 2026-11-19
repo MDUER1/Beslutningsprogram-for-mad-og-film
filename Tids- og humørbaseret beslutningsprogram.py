@@ -44,6 +44,8 @@ def byg_parser():
     parser.add_argument("--servering", choices=("varm", "kold"), help="Vælg varm eller kold mad.")
     parser.add_argument("--type", choices=("film", "serie"), help="Vælg spillefilm eller serieafsnit.")
     parser.add_argument("--spilletid", type=int, metavar="MIN", help="Maksimal cirka-spilletid pr. titel.")
+    parser.add_argument("--udelad", action="append", default=[], metavar="NAVN",
+                        help="Udeluk en ret eller titel. Kan gentages.")
     return parser
 
 
@@ -156,6 +158,14 @@ def main():
         titler = [titel for titel in titler if SPILLETID[titel] <= args.spilletid]
         if not titler:
             parser.error("Ingen titler passer til spilletiden.")
+
+    udeladt = {navn.strip().casefold() for navn in args.udelad}
+    retter = [ret for ret in retter if ret.casefold() not in udeladt]
+    titler = [titel for titel in titler if titel.casefold() not in udeladt]
+    if args.vis != "film" and not retter:
+        parser.error("Ingen retter tilbage efter filtrering.")
+    if args.vis != "mad" and not titler:
+        parser.error("Ingen titler tilbage efter filtrering.")
 
     if args.unik:
         mulige = list(product(retter or [None], titler or [None]))
